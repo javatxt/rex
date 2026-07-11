@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<link rel="icon" href="/favicon.ico" type="image/x-icon">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RMX</title>
@@ -18,6 +17,10 @@
             --btn-gradient-end: #e06028;
             --btn-glow: rgba(240, 130, 60, 0.4);
             --warm-gold: #d07020;
+            --modal-overlay: rgba(60, 30, 10, 0.55);
+            --modal-bg: #fdf6ed;
+            --code-bg: #f1e4d4;
+            --border-soft: #e8d5be;
         }
 
         * {
@@ -142,7 +145,9 @@
         }
 
         @keyframes avatarGlowSpin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .avatar-img {
@@ -232,12 +237,23 @@
             font-weight: 700;
         }
 
-        .btn-mc {
+        /* ===== 按钮组 ===== */
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            width: 100%;
+            justify-content: center;
+            margin-top: 0.2rem;
+        }
+
+        .btn-mc,
+        .btn-doc {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.9rem 2.2rem;
-            font-size: 1.1rem;
+            padding: 0.9rem 2rem;
+            font-size: 1.05rem;
             font-weight: 700;
             letter-spacing: 0.05em;
             color: #fff;
@@ -245,28 +261,21 @@
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            background: linear-gradient(135deg, #f08040, #e06028);
-            box-shadow:
-                0 6px 24px rgba(200, 80, 30, 0.35),
-                0 0 0 1px rgba(255, 180, 120, 0.3) inset;
             transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            flex: 1 1 auto;
+            min-width: 140px;
+            justify-content: center;
         }
 
-        .btn-mc::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s ease, height 0.6s ease;
+        .btn-mc {
+            background: linear-gradient(135deg, #f08040, #e06028);
+            box-shadow:
+                0 6px 24px rgba(200, 80, 30, 0.35),
+                0 0 0 1px rgba(255, 180, 120, 0.3) inset;
         }
 
         .btn-mc:hover {
@@ -285,12 +294,66 @@
             transition: all 0.12s ease;
         }
 
+        .btn-mc::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
         .btn-mc:hover::after {
             width: 300px;
             height: 300px;
         }
 
-        .btn-mc .btn-icon {
+        .btn-doc {
+            background: linear-gradient(135deg, #6a8a9a, #4a6a7a);
+            box-shadow:
+                0 6px 24px rgba(60, 90, 110, 0.35),
+                0 0 0 1px rgba(160, 200, 220, 0.25) inset;
+        }
+
+        .btn-doc:hover {
+            transform: translateY(-3px);
+            box-shadow:
+                0 10px 32px rgba(60, 90, 110, 0.5),
+                0 0 0 1px rgba(180, 210, 230, 0.35) inset;
+            background: linear-gradient(135deg, #7a9aaa, #5a7a8a);
+        }
+
+        .btn-doc:active {
+            transform: translateY(-1px) scale(0.97);
+            box-shadow:
+                0 4px 16px rgba(60, 90, 110, 0.4),
+                0 0 0 1px rgba(160, 200, 220, 0.3) inset;
+            transition: all 0.12s ease;
+        }
+
+        .btn-doc::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.25);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .btn-doc:hover::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-icon {
             font-size: 1.25rem;
             line-height: 1;
         }
@@ -302,6 +365,316 @@
             letter-spacing: 0.05em;
             text-align: center;
             user-select: none;
+        }
+
+        /* ===== 模态框 ===== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            background: var(--modal-overlay);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1.2rem;
+            opacity: 0;
+            transition: opacity 0.35s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-box {
+            background: var(--modal-bg);
+            border-radius: 28px;
+            max-width: 820px;
+            width: 100%;
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow:
+                0 30px 80px rgba(40, 20, 10, 0.4),
+                0 0 0 1px rgba(220, 180, 140, 0.2) inset;
+            overflow: hidden;
+            transform: scale(0.94) translateY(12px);
+            transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease;
+            opacity: 0;
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.2rem 1.8rem;
+            border-bottom: 1px solid var(--border-soft);
+            flex-shrink: 0;
+            background: rgba(255, 248, 240, 0.5);
+        }
+
+        .modal-header h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: 0.04em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-header h2 small {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            letter-spacing: 0.02em;
+        }
+
+        .modal-close {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(180, 120, 80, 0.12);
+            font-size: 1.5rem;
+            line-height: 1;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .modal-close:hover {
+            background: rgba(180, 120, 80, 0.25);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 1.6rem 1.8rem 2rem;
+            overflow-y: auto;
+            flex: 1 1 auto;
+            font-size: 0.92rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        .modal-body::-webkit-scrollbar {
+            width: 5px;
+        }
+        .modal-body::-webkit-scrollbar-track {
+            background: rgba(200, 170, 140, 0.15);
+            border-radius: 4px;
+        }
+        .modal-body::-webkit-scrollbar-thumb {
+            background: rgba(180, 140, 100, 0.4);
+            border-radius: 4px;
+        }
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(180, 140, 100, 0.6);
+        }
+
+        .modal-body .doc-section {
+            margin-bottom: 1.8rem;
+        }
+
+        .modal-body .doc-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal-body .doc-section h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.6rem;
+            padding-bottom: 0.3rem;
+            border-bottom: 2px solid rgba(200, 160, 120, 0.25);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-body .doc-section h3 .badge {
+            font-size: 0.65rem;
+            font-weight: 600;
+            background: rgba(200, 120, 50, 0.15);
+            color: #a06030;
+            padding: 0.1rem 0.7rem;
+            border-radius: 12px;
+            letter-spacing: 0.04em;
+        }
+
+        .modal-body .doc-section .sub-note {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            background: rgba(200, 180, 160, 0.15);
+            padding: 0.4rem 1rem;
+            border-radius: 10px;
+            margin-bottom: 0.8rem;
+            border-left: 3px solid rgba(200, 160, 120, 0.3);
+        }
+
+        .modal-body .cmd-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .modal-body .cmd-list li {
+            padding: 0.3rem 0 0.3rem 1.2rem;
+            position: relative;
+            border-bottom: 1px solid rgba(200, 180, 160, 0.1);
+            font-size: 0.9rem;
+        }
+
+        .modal-body .cmd-list li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: #c07030;
+            font-weight: 700;
+        }
+
+        .modal-body .cmd-list li .cmd-code {
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.88rem;
+            background: var(--code-bg);
+            padding: 0.1rem 0.5rem;
+            border-radius: 4px;
+            color: #7a3a1a;
+            display: inline-block;
+            word-break: break-all;
+        }
+
+        .modal-body .cmd-list li .cmd-desc {
+            color: var(--text-secondary);
+        }
+
+        .modal-body .cmd-list li .cmd-example {
+            display: block;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.82rem;
+            color: #7a5a3a;
+            background: rgba(200, 180, 160, 0.12);
+            padding: 0.15rem 0.7rem;
+            border-radius: 4px;
+            margin-top: 0.15rem;
+            border-left: 2px solid rgba(200, 160, 120, 0.25);
+        }
+
+        .modal-body .cmd-list li .cmd-example .label {
+            font-family: inherit;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-right: 0.3rem;
+        }
+
+        .modal-body .cmd-list li .cmd-sub {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            padding-left: 0.5rem;
+            margin-top: 0.1rem;
+        }
+
+        .modal-body .gamerule-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.2rem 0.8rem;
+            background: rgba(200, 180, 160, 0.08);
+            border-radius: 10px;
+            padding: 0.5rem 0.8rem;
+            margin-top: 0.2rem;
+        }
+
+        .modal-body .gamerule-grid .gr-item {
+            font-size: 0.85rem;
+            padding: 0.15rem 0;
+            display: flex;
+            align-items: baseline;
+            gap: 0.3rem;
+        }
+
+        .modal-body .gamerule-grid .gr-item .gr-cmd {
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.78rem;
+            background: var(--code-bg);
+            padding: 0.05rem 0.4rem;
+            border-radius: 3px;
+            color: #6a3a1a;
+            white-space: nowrap;
+        }
+
+        .modal-body .gamerule-grid .gr-item .gr-desc {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+        }
+
+        .modal-body .tip-block {
+            background: rgba(200, 160, 120, 0.1);
+            border-left: 4px solid #c07030;
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            margin: 0.6rem 0 0.2rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .modal-body .tip-block strong {
+            color: var(--text-primary);
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 600px) {
+            .modal-body {
+                padding: 1.2rem 1.2rem 1.6rem;
+                font-size: 0.85rem;
+            }
+            .modal-header {
+                padding: 0.9rem 1.2rem;
+            }
+            .modal-header h2 {
+                font-size: 1.1rem;
+            }
+            .modal-header h2 small {
+                font-size: 0.7rem;
+            }
+            .modal-box {
+                max-height: 92vh;
+                border-radius: 20px;
+            }
+            .modal-body .cmd-list li {
+                font-size: 0.83rem;
+                padding: 0.25rem 0 0.25rem 1rem;
+            }
+            .modal-body .cmd-list li .cmd-code {
+                font-size: 0.8rem;
+            }
+            .modal-body .gamerule-grid {
+                grid-template-columns: 1fr;
+                gap: 0.1rem;
+            }
+            .btn-group {
+                flex-direction: column;
+                gap: 0.6rem;
+            }
+            .btn-mc,
+            .btn-doc {
+                min-width: 0;
+                padding: 0.8rem 1.4rem;
+                font-size: 0.95rem;
+                flex: 1 1 auto;
+            }
         }
 
         @media (max-width: 480px) {
@@ -324,12 +697,11 @@
             .main-message {
                 font-size: 0.95rem;
             }
-            .btn-mc {
-                padding: 0.75rem 1.7rem;
-                font-size: 1rem;
-            }
             .signature-tag {
                 font-size: 0.8rem;
+            }
+            .modal-body .cmd-list li .cmd-example {
+                font-size: 0.76rem;
             }
         }
 
@@ -350,9 +722,10 @@
             .main-message {
                 font-size: 0.85rem;
             }
-            .btn-mc {
-                padding: 0.65rem 1.4rem;
-                font-size: 0.9rem;
+            .btn-mc,
+            .btn-doc {
+                padding: 0.65rem 1.2rem;
+                font-size: 0.85rem;
             }
         }
     </style>
@@ -361,15 +734,15 @@
     <canvas id="particleCanvas"></canvas>
 
     <div class="main-container">
-        <div class="brand-tag">(ᗜ ˰ ᗜ) </div>
+        <div class="brand-tag">(ᗜ ˰ ᗜ)</div>
         <div class="card">
             <div class="avatar-wrapper">
                 <img class="avatar-img"
-                     src="https://q1.qlogo.cn/g?b=qq&nk=3643901556&s=640"
-                     alt="头像"
-                     loading="eager"
-                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
-                     onload="this.nextElementSibling.style.display='none';">
+                src="https://q1.qlogo.cn/g?b=qq&nk=3643901556&s=640"
+                alt="头像"
+                loading="eager"
+                onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+                onload="this.nextElementSibling.style.display='none';">
                 <div class="avatar-fallback" style="display:none;">¯꒳¯</div>
             </div>
             <div class="name-display">Ren Minxing</div>
@@ -378,11 +751,235 @@
             <p class="main-message">
                 你是否想在学校玩到<span class="highlight">我的世界</span>，<br>但没人陪你玩。没事，<span class="highlight">我有一计</span>。
             </p>
-            <a href="https://mcjs.cc/" target="_blank" rel="noopener noreferrer" class="btn-mc">
-                <span class="btn-icon">😲</span> 网页版 MC
-            </a>
+
+            <!-- 按钮组 -->
+            <div class="btn-group">
+                <a href="https://mcjs.cc/" target="_blank" rel="noopener noreferrer" class="btn-mc">
+                    <span class="btn-icon">😲</span> 网页版 MC
+                </a>
+                <button class="btn-doc" id="openDocBtn">
+                    <span class="btn-icon">📖</span> 指令文档
+                </button>
+            </div>
         </div>
         <div class="footer-note">RMX的小站@javatnt © 2026</div>
+    </div>
+
+    <!-- ===== 模态框 ===== -->
+    <div class="modal-overlay" id="docModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2>
+                    ⚙️ 指令文档
+                    <small>Minecraft 1.8.8 · Java版</small>
+                </h2>
+                <button class="modal-close" id="closeDocBtn">✕</button>
+            </div>
+            <div class="modal-body" id="docBody">
+
+                <!-- 前言 -->
+                <div class="doc-section">
+                    <div class="sub-note">
+                        <strong>📌 前提：</strong>开启作弊（单人创建世界时勾选「允许作弊」）；服务器需要 <strong>OP</strong> 管理员权限。<br>
+                        <strong>🎯 目标选择器：</strong> <code>@p</code> 最近玩家 · <code>@a</code> 全部玩家 · <code>@r</code> 随机玩家 · <code>@s</code> 自己
+                    </div>
+                </div>
+
+                <!-- 一 -->
+                <div class="doc-section">
+                    <h3>一、玩家 &amp; 权限管理 <span class="badge">服务器常用</span></h3>
+                    <ul class="cmd-list">
+                        <li><span class="cmd-code">/op &lt;玩家名&gt;</span> <span class="cmd-desc">给予玩家管理员权限</span></li>
+                        <li><span class="cmd-code">/deop &lt;玩家名&gt;</span> <span class="cmd-desc">撤销管理员权限</span></li>
+                        <li><span class="cmd-code">/kick &lt;玩家名&gt; [原因]</span> <span class="cmd-desc">踢出玩家</span>
+                            <span class="cmd-example"><span class="label">例：</span>/kick Steve 违规</span>
+                        </li>
+                        <li><span class="cmd-code">/ban &lt;玩家名&gt; [理由]</span> <span class="cmd-desc">封禁玩家账号</span></li>
+                        <li><span class="cmd-code">/ban-ip &lt;IP地址&gt;</span> <span class="cmd-desc">封禁IP地址</span></li>
+                        <li><span class="cmd-code">/pardon &lt;玩家名&gt;</span> <span class="cmd-desc">解除玩家封禁</span></li>
+                        <li><span class="cmd-code">/pardon-ip &lt;IP&gt;</span> <span class="cmd-desc">解除IP封禁</span></li>
+                        <li><span class="cmd-code">/banlist</span> <span class="cmd-desc">查看黑名单列表</span></li>
+                        <li><span class="cmd-code">/whitelist add &lt;玩家名&gt;</span> <span class="cmd-desc">添加白名单</span></li>
+                        <li><span class="cmd-code">/whitelist remove &lt;玩家名&gt;</span> <span class="cmd-desc">移除白名单</span></li>
+                        <li><span class="cmd-code">/whitelist list</span> <span class="cmd-desc">查看白名单玩家</span></li>
+                        <li><span class="cmd-code">/list</span> <span class="cmd-desc">查看当前在线所有玩家</span></li>
+                        <li><span class="cmd-code">/me &lt;内容&gt;</span> <span class="cmd-desc">发送动作消息</span>
+                            <span class="cmd-example"><span class="label">例：</span>/me 正在挖矿</span>
+                        </li>
+                        <li><span class="cmd-code">/msg &lt;玩家&gt; &lt;消息&gt;</span> <span class="cmd-desc">私聊玩家（简写 <code>/w</code>）</span></li>
+                        <li><span class="cmd-code">/say &lt;内容&gt;</span> <span class="cmd-desc">全服广播消息</span></li>
+                    </ul>
+                </div>
+
+                <!-- 二 -->
+                <div class="doc-section">
+                    <h3>二、游戏模式 · 难度 · 出生点</h3>
+                    <ul class="cmd-list">
+                        <li>
+                            <span class="cmd-code">/gamemode &lt;0/1/2/3&gt; [玩家]</span>
+                            <span class="cmd-desc">0=生存，1=创造，2=冒险，3=旁观</span>
+                            <span class="cmd-example"><span class="label">例：</span>/gamemode 1 @s  给自己开创造</span>
+                        </li>
+                        <li><span class="cmd-code">/defaultgamemode &lt;0/1/2/3&gt;</span> <span class="cmd-desc">设置世界默认游戏模式</span></li>
+                        <li>
+                            <span class="cmd-code">/difficulty &lt;0/1/2/3&gt;</span>
+                            <span class="cmd-desc">0=和平，1=简单，2=普通，3=困难</span>
+                        </li>
+                        <li><span class="cmd-code">/spawnpoint [玩家] [x y z]</span> <span class="cmd-desc">设置玩家个人重生点（不写坐标=当前位置）</span></li>
+                        <li><span class="cmd-code">/setworldspawn [x y z]</span> <span class="cmd-desc">设置世界公共出生点</span></li>
+                    </ul>
+                </div>
+
+                <!-- 三 -->
+                <div class="doc-section">
+                    <h3>三、物品 · 背包 · 附魔 · 经验</h3>
+                    <ul class="cmd-list">
+                        <li>
+                            <span class="cmd-code">/give &lt;玩家&gt; &lt;物品ID&gt; [数量] [数据值] [NBT]</span>
+                            <span class="cmd-desc">给予物品（1.8.8 只用数字ID或英文ID，不加 <code>minecraft:</code>）</span>
+                            <span class="cmd-example"><span class="label">例：</span>/give @s diamond 64</span>
+                        </li>
+                        <li>
+                            <span class="cmd-code">/clear [玩家] [物品ID] [数据值] [数量]</span>
+                            <span class="cmd-desc">清空背包物品</span>
+                            <span class="cmd-example"><span class="label">例：</span>/clear @s  清空自己全部背包</span>
+                        </li>
+                        <li>
+                            <span class="cmd-code">/enchant &lt;玩家&gt; &lt;附魔ID&gt; [等级]</span>
+                            <span class="cmd-desc">给手持物品附魔</span>
+                            <span class="cmd-example"><span class="label">例：</span>/enchant @s 16 5  锋利V</span>
+                        </li>
+                        <li>
+                            <span class="cmd-code">/xp &lt;数值&gt;[L] &lt;玩家&gt;</span>
+                            <span class="cmd-desc">给予经验（不加L=经验点数，加L=等级）</span>
+                            <span class="cmd-example"><span class="label">例：</span>/xp 1000 @s  → 1000经验； /xp 30L @s  → 直升30级</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 四 -->
+                <div class="doc-section">
+                    <h3>四、世界环境 · 时间 · 天气 · gamerule</h3>
+                    <ul class="cmd-list">
+                        <li>
+                            <span class="cmd-code">/time set &lt;数值/day/night&gt;</span>
+                            <span class="cmd-desc"><code>day</code>=白天(1000)，<code>night</code>=夜晚(13000)</span>
+                        </li>
+                        <li><span class="cmd-code">/time add &lt;数值&gt;</span> <span class="cmd-desc">增加游戏时间</span></li>
+                        <li>
+                            <span class="cmd-code">/weather &lt;clear/rain/thunder&gt; [持续秒数]</span>
+                            <span class="cmd-desc"><code>clear</code>晴天 · <code>rain</code>下雨 · <code>thunder</code>雷雨</span>
+                        </li>
+                        <li>
+                            <span class="cmd-code">/gamerule &lt;规则&gt; true/false</span>
+                            <span class="cmd-desc">核心规则（1.8.8）</span>
+                            <div class="gamerule-grid">
+                                <div class="gr-item"><span class="gr-cmd">keepInventory</span> <span class="gr-desc">死亡不掉落</span></div>
+                                <div class="gr-item"><span class="gr-cmd">doDaylightCycle</span> <span class="gr-desc">关闭时间流逝</span></div>
+                                <div class="gr-item"><span class="gr-cmd">doMobSpawning</span> <span class="gr-desc">禁止生物生成</span></div>
+                                <div class="gr-item"><span class="gr-cmd">doFireTick</span> <span class="gr-desc">火不蔓延/熄灭</span></div>
+                                <div class="gr-item"><span class="gr-cmd">mobGriefing</span> <span class="gr-desc">苦力怕/末影人不破坏方块</span></div>
+                                <div class="gr-item"><span class="gr-cmd">commandBlockOutput</span> <span class="gr-desc">关闭命令方块聊天提示</span></div>
+                            </div>
+                        </li>
+                        <li><span class="cmd-code">/seed</span> <span class="cmd-desc">查看当前世界种子码</span></li>
+                    </ul>
+                </div>
+
+                <!-- 五 -->
+                <div class="doc-section">
+                    <h3>五、传送 · 实体 · 生成生物</h3>
+                    <ul class="cmd-list">
+                        <li>
+                            <span class="cmd-code">/tp [目标玩家] &lt;x y z / 玩家名&gt;</span>
+                            <span class="cmd-desc">传送（1.8.8 不支持 <code>/teleport</code>）</span>
+                            <span class="cmd-example"><span class="label">例：</span>/tp @s 100 64 -200  /  /tp Steve Alex</span>
+                        </li>
+                        <li>
+                            <span class="cmd-code">/kill &lt;目标&gt;</span>
+                            <span class="cmd-desc">杀死实体</span>
+                            <span class="cmd-example">
+                                <span class="label">例：</span>/kill @s 自杀； /kill @e 清全部实体<br>
+                                /kill @e[type=creeper] 清苦力怕； /kill @e[type=item] 清掉落物
+                            </span>
+                        </li>
+                        <li>
+                            <span class="cmd-code">/summon &lt;实体ID&gt; [x y z] [NBT]</span>
+                            <span class="cmd-desc">召唤生物</span>
+                            <span class="cmd-example"><span class="label">例：</span>/summon zombie ~ ~ ~  在脚下生成僵尸（<code>~ ~ ~</code> 当前位置）</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 六 -->
+                <div class="doc-section">
+                    <h3>六、方块操作 <span class="badge">命令方块核心</span></h3>
+                    <ul class="cmd-list">
+                        <li>
+                            <span class="cmd-code">/setblock &lt;x y z&gt; &lt;方块ID&gt; [数据值] [replace/keep/destroy] [NBT]</span>
+                            <span class="cmd-desc">放置单个方块</span>
+                            <span class="cmd-example"><span class="label">例：</span>/setblock 100 64 200 diamond_block 0 replace</span>
+                        </li>
+                        <li><span class="cmd-code">/fill &lt;x1 y1 z1&gt; &lt;x2 y2 z2&gt; &lt;方块ID&gt;</span> <span class="cmd-desc">批量填充区域方块</span></li>
+                        <li><span class="cmd-code">/clone &lt;x1 y1 z1&gt; &lt;x2 y2 z2&gt; &lt;目标x y z&gt;</span> <span class="cmd-desc">复制区域方块到目标位置</span></li>
+                        <li><span class="cmd-code">/blockdata &lt;x y z&gt; {标签}</span> <span class="cmd-desc">修改方块NBT数据（箱子、熔炉等）</span></li>
+                    </ul>
+                </div>
+
+                <!-- 七 -->
+                <div class="doc-section">
+                    <h3>七、高级指令 <span class="badge">命令方块 · 计分板 · 粒子</span></h3>
+                    <ul class="cmd-list">
+                        <li>
+                            <span class="cmd-code">/execute &lt;执行者&gt; &lt;x y z&gt; &lt;指令&gt;</span>
+                            <span class="cmd-desc">以指定实体身份执行指令</span>
+                            <span class="cmd-example"><span class="label">例：</span>/execute @a ~ ~ ~ setblock ~ ~-1 ~ stone</span>
+                        </li>
+                        <li><span class="cmd-code">/entitydata &lt;目标&gt; {NBT标签}</span> <span class="cmd-desc">修改生物/玩家数据（装备、改名等）</span></li>
+                        <li>
+                            <span class="cmd-code">/scoreboard &lt;objectives/players/teams&gt;</span>
+                            <span class="cmd-desc">计分板系统（小游戏、血量、计时器）</span>
+                            <span class="cmd-example"><span class="label">例：</span>/scoreboard objectives add test dummy</span>
+                        </li>
+                        <li><span class="cmd-code">/particle &lt;粒子名&gt; x y z x偏移 y偏移 z偏移 速度 数量</span> <span class="cmd-desc">生成粒子效果</span></li>
+                        <li><span class="cmd-code">/playsound &lt;音效&gt; &lt;玩家&gt; x y z 音量 音调</span> <span class="cmd-desc">播放游戏音效</span></li>
+                        <li><span class="cmd-code">/replaceitem &lt;位置&gt; &lt;物品ID&gt; [数量]</span> <span class="cmd-desc">替换指定格子物品（箱子/玩家背包）</span></li>
+                        <li><span class="cmd-code">/publish</span> <span class="cmd-desc">单人世界开放局域网</span></li>
+                        <li><span class="cmd-code">/debug start</span> <span class="cmd-desc">开启调试模式</span> ｜ <span class="cmd-code">/debug stop</span> <span class="cmd-desc">关闭调试</span></li>
+                    </ul>
+                </div>
+
+                <!-- 八 -->
+                <div class="doc-section">
+                    <h3>八、辅助指令</h3>
+                    <ul class="cmd-list">
+                        <li><span class="cmd-code">/help [页码/指令名]</span> <span class="cmd-desc">查看指令帮助</span>
+                            <span class="cmd-example"><span class="label">例：</span>/help give</span>
+                        </li>
+                        <li><span class="cmd-code">/spawnpoint</span> <span class="cmd-desc">把自己重生点设到脚下</span></li>
+                    </ul>
+                </div>
+
+                <!-- 补充 -->
+                <div class="doc-section">
+                    <h3>⚠️ 1.8.8 不可用指令 <span class="badge">1.13+ 新增</span></h3>
+                    <ul class="cmd-list">
+                        <li><code>/teleport</code>（只能用 <code>/tp</code>）</li>
+                        <li><code>@e[type=!player]</code>（反选实体不支持）</li>
+                        <li><code>fill replace</code> 高级写法不支持</li>
+                        <li>命名空间前缀 <code>minecraft:</code> 不支持（只用ID数字或英文名）</li>
+                    </ul>
+                    <div class="tip-block">
+                        <strong>📋 常用简短示例（直接复制可用）</strong><br>
+                        · 死亡不掉落：<code>/gamerule keepInventory true</code><br>
+                        · 给自己64钻石：<code>/give @s diamond 64</code><br>
+                        · 传送到脚下上方10格：<code>/tp @s ~ ~10 ~</code><br>
+                        · 清除全部掉落物：<code>/kill @e[type=item]</code>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
 
     <script>
@@ -467,7 +1064,8 @@
                     if (this.size > 2.6 && this.displayOpacity > 0.3) {
                         ctx.beginPath();
                         ctx.arc(this.x, this.y, this.size * 1.7, 0, Math.PI * 2);
-                        const glowGradient = ctx.createRadialGradient(this.x, this.y, this.size * 0.3, this.x, this.y, this.size * 1.7);
+                        const glowGradient = ctx.createRadialGradient(this.x, this.y, this.size * 0.3, this.x, this.y, this.size *
+                            1.7);
                         glowGradient.addColorStop(0, this.color);
                         glowGradient.addColorStop(1, 'transparent');
                         ctx.fillStyle = glowGradient;
@@ -535,7 +1133,7 @@
                 mouseY = -200;
             }
 
-            function init() {
+            function initParticles() {
                 resizeCanvas();
                 createParticles();
                 if (animationId) cancelAnimationFrame(animationId);
@@ -552,7 +1150,37 @@
             window.addEventListener('mouseleave', handleMouseLeave);
             window.addEventListener('blur', handleMouseLeave);
 
-            init();
+            initParticles();
+
+            // ===== 模态框控制 =====
+            const modal = document.getElementById('docModal');
+            const openBtn = document.getElementById('openDocBtn');
+            const closeBtn = document.getElementById('closeDocBtn');
+
+            function openModal() {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeModal() {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            openBtn.addEventListener('click', openModal);
+            closeBtn.addEventListener('click', closeModal);
+
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal.classList.contains('active')) {
+                    closeModal();
+                }
+            });
         })();
     </script>
 </body>
